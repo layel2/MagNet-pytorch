@@ -4,7 +4,7 @@ import torchvision
 import torch
 
 data_train = torchvision.datasets.MNIST('./',train=True,download=True,transform=torchvision.transforms.ToTensor())
-loder_train = torch.utils.data.DataLoader(data_train,batch_size=64)
+loader_train = torch.utils.data.DataLoader(data_train,batch_size=64)
 
 ae_1 = DAE_1()
 ae_1.train(loader_train,v_noise=0.1)
