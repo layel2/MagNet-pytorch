@@ -60,7 +60,7 @@ class DenoisingAutoEncoder_2():
                 nn.Conv2d(in_channels=3, out_channels=self.img_shape[0], kernel_size=3,padding=1),
                 nn.Sigmoid()).to(device)
         
-    def train(self,data,save_path="./saved_model/model1.pth",v_noise=0,num_epochs=100, batch_size=256,if_save=True):
+    def train(self,data,save_path="./saved_model/model2.pth",v_noise=0,num_epochs=100, batch_size=256,if_save=True):
         optimizer = torch.optim.Adam(self.model.parameters())
         log_interval = 10
         for epoch in range(num_epochs):
