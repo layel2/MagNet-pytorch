@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-import torch.functional as F
+import torch.nn.functional as F
 
 class DenoisingAutoEncoder_1():
     def __init__(self,img_shape = (1,28,28)):
