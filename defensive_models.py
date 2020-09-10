@@ -30,7 +30,8 @@ class DenoisingAutoEncoder_1():
             for batch_i,(data_train,data_label) in enumerate(data):
                 noise = v_noise * torch.randn_like(data_train)
                 noisy_data = torch.clamp(data_train+noise,min=0,max=1 )
-                
+                data_train = torch.autograd.Variable(data_train).to(device)
+                noisy_data = torch.autograd.Variable(noisy_data).to(device)
                 optimizer.zero_grad()
                 output = self.model(noisy_data)
                 loss = F.mse_loss(output,data_train)
@@ -66,8 +67,10 @@ class DenoisingAutoEncoder_2():
             self.model.train()
             for batch_i,(data_train,data_label) in enumerate(data):
                 noise = v_noise * torch.randn_like(data_train)
-                noisy_data = torch.clamp(data_train+noise,min=0,max=1 )
-                
+                noisy_data = torch.clamp(data_train+noise,min=0,max=1 ) 
+                data_train = torch.autograd.Variable(data_train).to(device)
+                noisy_data = torch.autograd.Variable(noisy_data).to(device)
+
                 optimizer.zero_grad()
                 output = self.model(noisy_data)
                 loss = F.mse_loss(output,data_train)
