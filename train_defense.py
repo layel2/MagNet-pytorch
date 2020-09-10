@@ -1,6 +1,7 @@
 from defensive_models import DenoisingAutoEncoder_1 as DAE_1
 from defensive_models import DenoisingAutoEncoder_2 as DAE_2
 import torchvision
+import torch
 
 data_train = torchvision.datasets.MNIST('./',train=True,download=True,transform=torchvision.transforms.ToTensor())
 loder_train = torch.utils.data.DataLoader(data_train,batch_size=64)
