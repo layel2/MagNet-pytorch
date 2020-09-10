@@ -2,6 +2,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 class DenoisingAutoEncoder_1():
     def __init__(self,img_shape = (1,28,28)):
         self.img_shape = img_shape
@@ -18,7 +20,7 @@ class DenoisingAutoEncoder_1():
                 nn.Conv2d(in_channels=3, out_channels=3, kernel_size=3,padding=1),
                 nn.Sigmoid(),
                 nn.Conv2d(in_channels=3, out_channels=self.img_shape[0], kernel_size=3,padding=1),
-                nn.Sigmoid())
+                nn.Sigmoid()).to(device)
     
     def train(self,data,save_path="./saved_model/model1.pth",v_noise=0,num_epochs=100, batch_size=256,if_save=True):
         optimizer = torch.optim.Adam(self.model.parameters())
@@ -55,7 +57,7 @@ class DenoisingAutoEncoder_2():
                 nn.Conv2d(in_channels=3, out_channels=3, kernel_size=3,padding=1),
                 nn.Sigmoid(),
                 nn.Conv2d(in_channels=3, out_channels=self.img_shape[0], kernel_size=3,padding=1),
-                nn.Sigmoid())
+                nn.Sigmoid()).to(device)
         
     def train(self,data,save_path="./saved_model/model1.pth",v_noise=0,num_epochs=100, batch_size=256,if_save=True):
         optimizer = torch.optim.Adam(self.model.parameters())
