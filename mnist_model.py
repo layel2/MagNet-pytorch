@@ -28,4 +28,5 @@ def getmodel(model=mnistmodel_A(),load_path=None):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if not load_path is None :
         model.load_state_dict(torch.load(load_path,map_location=device))
-    return model    
+    model.to(device)
+    return model  
