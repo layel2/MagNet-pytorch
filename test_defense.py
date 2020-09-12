@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from scipy.stats import entropy
+#from scipy.stats import entropy
 from numpy.linalg import norm
 
 class AEDectector():
@@ -13,8 +13,8 @@ class AEDectector():
         self.p = p
 
     def mark(self,X):
-        diff = np.abs(X - self.model(X))
-        marks = np.mean(np.power(diff, self.p), axis=(1,2,3))
+        diff = torch.abs(X - self.model(X).detach().numpy())
+        marks = torch.mean(torch.pow(diff, self.p), axis=(1,2,3))
         return marks
 
     def print(self):
@@ -69,18 +69,17 @@ class Operator():
         self.classifier = classifier
         self.det_dict = det_dict
         self.reformer = reformer
-        self.normal = self.operate(AttackData(self.data.test_data,
-                        np.argmax(self.data.test_labels, axis=1), "Normal"))
+        self.normal = self.operate(self.data)
 
     def operate(self,untrusted_obj):
         X = untrusted_obj.data
         y_true = untrusted_obj.labels
 
         X_prime = self.reformer.heal(X)
-        y = np.argmax(self.classifier.classify(X),axis=1)
+        y = torch.argmax(self.classifier(X),axis=1)
         y_judge = (y == y_true[:len(X_prime)])
-        y_prime = np.argmax(self.classifier.classify(X_prime),axis=1)
-        y_prime_judge = (y_prime === y_true[:len(X_prime)])
+        y_prime = torch.argmax(self.classifier(X_prime),axis=1)
+        y_prime_judge = (y_prime == y_true[:len(X_prime)])
 
         return np.array(list(zip(y_judge,y_prime_judge)))
 
@@ -93,6 +92,18 @@ class Operator():
             collector[name] = len(idx_pass)
             all_pass = np.intersect1d(all_pass, idx_pass)
         return all_pass, collector
+
+    def get_thrs(self, drop_rate):
+        """
+        Get filtering threshold by marking validation set.
+        """
+        thrs = dict()
+        for name, detector in self.det_dict.items():
+            num = int(len(self.data.data) * drop_rate[name])
+            marks = detector.mark(self.data.data)
+            marks = np.sort(marks)
+            thrs[name] = marks[-num]
+        return thrs
 
 class AttackData():
     def __init__(self,examples,labels,name=""):
