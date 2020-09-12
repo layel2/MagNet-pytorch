@@ -13,7 +13,7 @@ class AEDectector():
         self.p = p
 
     def mark(self,X):
-        diff = torch.abs(X - self.model(X).detach().numpy())
+        diff = torch.abs(X - self.model(X))
         marks = torch.mean(torch.pow(diff, self.p), axis=(1,2,3))
         return marks
 
@@ -87,8 +87,8 @@ class Operator():
         collector = dict()
         all_pass = np.array(range(10000))
         for name,detector in self.det_dict.items():
-            marks = detector.mark(X).cpu().numpy()
-            idx_pass = np.argwhere(marks < thrs[name])
+            marks = detector.mark(X).cpu().detach().numpy()
+            idx_pass = np.argwhere(marks < thrs[name].cpu().detach().numpy())
             collector[name] = len(idx_pass)
             all_pass = np.intersect1d(all_pass, idx_pass)
         return all_pass, collector
@@ -101,7 +101,7 @@ class Operator():
         for name, detector in self.det_dict.items():
             num = int(len(self.data.data) * drop_rate[name])
             marks = detector.mark(self.data.data)
-            marks = np.sort(marks)
+            marks,_ = torch.sort(marks)
             thrs[name] = marks[-num]
         return thrs
 
