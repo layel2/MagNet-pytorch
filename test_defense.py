@@ -28,6 +28,7 @@ detector_dict["2"] = detector_2
 
 operator = Operator(data, clf, detector_dict, reformer)
 evau = Evauator(operator,data_atk)
+thrs = evau.operator.get_thrs({'1':0.001,'2':0.001})
 all_pass = evau.operator.filter(evau.operator.data.data,thrs)
 
 result = evau.get_attack_acc(evau.operator.filter(data_atk.data,thrs)[0])

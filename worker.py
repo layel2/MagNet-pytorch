@@ -3,6 +3,8 @@ import numpy as np
 #from scipy.stats import entropy
 from numpy.linalg import norm
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 class AEDectector():
     def __init__(self,model,load_path=None,p=1):
         if load_path != None :
@@ -13,6 +15,7 @@ class AEDectector():
         self.p = p
 
     def mark(self,X):
+        X = X.to(device)
         diff = torch.abs(X - self.model(X))
         marks = torch.mean(torch.pow(diff, self.p), axis=(1,2,3))
         return marks
@@ -72,8 +75,8 @@ class Operator():
         self.normal = self.operate(self.data)
 
     def operate(self,untrusted_obj):
-        X = untrusted_obj.data
-        y_true = untrusted_obj.labels
+        X = untrusted_obj.data.to(device)
+        y_true = untrusted_obj.labels.to(device)
 
         X_prime = self.reformer.heal(X)
         y = torch.argmax(self.classifier(X),axis=1)
