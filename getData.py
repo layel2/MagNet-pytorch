@@ -10,10 +10,10 @@ class MNISTdata():
         data_train = torchvision.datasets.MNIST('./',train=True,download=True,transform=torchvision.transforms.ToTensor())
         data_test = torchvision.datasets.MNIST('./',train=False,download=True,transform=torchvision.transforms.ToTensor())
         
-        self.train_data = torch.mul(data_train.data,1/255).reshape((-1,1,28,28)).type(torch.float32).to(device)
-        self.train_labels = data_train.targets.to(device)
-        self.test_data = torch.mul(data_test.data,1/255).reshape((-1,1,28,28)).type(torch.float32).to(device)
-        self.test_labels = data_test.targets.to(device)
+        self.train_data = torch.mul(data_train.data,1/255).reshape((-1,1,28,28)).type(torch.float32)
+        self.train_labels = data_train.targets
+        self.test_data = torch.mul(data_test.data,1/255).reshape((-1,1,28,28)).type(torch.float32)
+        self.test_labels = data_test.targets
 
 
 class dataLoader(torch.utils.data.Dataset):
@@ -45,7 +45,7 @@ class attackMnist():
     def __init__(self,attack_model,attack_method="FGSM",eps=0.3,data_type = "test",rand_seed=0,rand_min=0,rand_max=1):
         data = MNISTdata()
         if data_type == 'train' :
-            self.data = data.train_data
+            self.data = data.train_data.to
             self.labels = data.train_labels
         else :
             self.data = data.test_data
@@ -55,8 +55,8 @@ class attackMnist():
             #eps random
             None
         else :
-            x_atk = FGSM(attack_model,loss_fn=torch.nn.NLLLoss(),eps=eps).perturb(self.data,self.labels)
-            self.data = x_atk
+            x_atk = FGSM(attack_model,loss_fn=torch.nn.NLLLoss(),eps=eps).perturb(self.data.to(device),self.labels.to(device))
+            self.data = x_atk.cpu()
 
         
         self.loader = dataLoader(self.data, self.labels)
