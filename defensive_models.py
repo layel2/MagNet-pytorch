@@ -43,7 +43,7 @@ class DenoisingAutoEncoder_1():
         torch.save(self.model.state_dict(), save_path)
         
     def load(self, load_path):
-        self.model.load_state_dict(torch.load(load_path))
+        self.model.load_state_dict(torch.load(load_path,map_location=torch.device(device)))
             
         
 
@@ -82,5 +82,5 @@ class DenoisingAutoEncoder_2():
         torch.save(self.model.state_dict(), save_path)
         
     def load(self, load_path):
-        self.model.load_state_dict(torch.load(load_path))
+        self.model.load_state_dict(torch.load(load_path,map_location=torch.device(device)))
 
