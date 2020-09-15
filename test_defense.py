@@ -33,4 +33,7 @@ all_pass = evau.operator.filter(evau.operator.data.data,thrs)
 
 result = evau.get_attack_acc(evau.operator.filter(data_atk.data,thrs)[0])
 
-print(result)
+print('No defense accuracy :'result[3])
+print('Reformer only accuracy :'result[2])
+print('Detector only accuracy :'result[1])
+print('Both detector and reformer accuracy :'result[0])
