@@ -16,7 +16,7 @@ class MNISTdata():
         self.test_labels = data_test.targets
 
 
-class dataLoader(torch.utils.data.Dataset):
+class dataSet(torch.utils.data.Dataset):
     def __init__(self,data,labels):
         self.data = data
         self.labels = labels
@@ -30,7 +30,7 @@ class dataLoader(torch.utils.data.Dataset):
         return data,labels
 
 class normalMnist():
-    def __init__(self, data_type = "test"):
+    def __init__(self, data_type = "test",loader_batch=128):
         data = MNISTdata()
         if data_type == 'train' :
             self.data = data.train_data
@@ -39,7 +39,7 @@ class normalMnist():
             self.data = data.test_data
             self.labels = data.test_labels
 
-        self.loader = dataLoader(self.data, self.labels)
+        self.loader = torch.utils.data.DataLoader(dataSet(self.data, self.labels),batch_size=loader_batch)
 
 class attackMnist():
     def __init__(self,attack_model,attack_method="FGSM",eps=0.3,data_type = "test",rand_seed=0,rand_min=0,rand_max=1):
@@ -59,7 +59,7 @@ class attackMnist():
             self.data = x_atk.cpu()
 
         
-        self.loader = dataLoader(self.data, self.labels)
+        self.loader = dataSet(self.data, self.labels)
 
 
 from advertorch.attacks.base import Attack,LabelMixin
