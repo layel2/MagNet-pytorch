@@ -45,7 +45,7 @@ class attackMnist():
     def __init__(self,attack_model,attack_method="FGSM",eps=0.3,data_type = "test",rand_seed=0,rand_min=0,rand_max=1):
         data = MNISTdata()
         if data_type == 'train' :
-            self.data = data.train_data.to
+            self.data = data.train_data
             self.labels = data.train_labels
         else :
             self.data = data.test_data
