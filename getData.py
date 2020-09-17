@@ -1,5 +1,6 @@
 import torchvision
 import torch
+import numpy as np
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class MNISTdata():
@@ -42,26 +43,48 @@ class normalMnist():
         self.loader = torch.utils.data.DataLoader(dataSet(self.data, self.labels),batch_size=loader_batch)
 
 class attackMnist():
-    def __init__(self,attack_model,attack_method="FGSM",eps=0.3,data_type = "test",rand_seed=0,rand_min=0,rand_max=1):
-        data = MNISTdata()
-        if data_type == 'train' :
-            self.data = data.train_data
-            self.labels = data.train_labels
-        else :
-            self.data = data.test_data
-            self.labels = data.test_labels
+    def __init__(self,attack_model,attack_method="FGSM",eps=0.3,data_type = "test",rand_seed=0,rand_min=0,rand_max=1,loader_batch=128,for_trainning = False):
+        normal_data = normalMnist(data_type=data_type,loader_batch=loader_batch)
+        self.noarmal_data = normal_data.data
+        self.labels = normal_data.labels
 
-        if isinstance(eps,str):
-            #eps random
-            None
-        else :
-            x_atk = FGSM(attack_model,loss_fn=torch.nn.NLLLoss(),eps=eps).perturb(self.data.to(device),self.labels.to(device))
-            self.data = x_atk.cpu()
+        x_atk = torch.tensor([]).to(device)
+        bs = loader_batch
+        for batch_data,batch_labels in normal_data.loader:
+            if isinstance(eps, str):
+                batch_pn = FGSM(attack_model,loss_fn=torch.nn.NLLLoss(),getAtkpn=True).perturb(batch_data.to(device),batch_labels.to(device))
+                eps_temp = (1)*torch.rand((len(batch_pn),1,1,1))
+                eps_temp = eps_temp.to(device)
+                batch_atk = torch.clamp(batch_data.to(device)+eps_temp*batch_pn,min=0,max=1)
+            else :
+                batch_atk = FGSM(attack_model,loss_fn=torch.nn.NLLLoss(),eps=eps).perturb(batch_data.to(device),batch_labels.to(device))
+            x_atk = torch.cat((x_atk,batch_atk))
+        #x_atk = torch.tensor(x_atk)
+        self.data = x_atk.cpu()
 
+        if for_trainning:
+            self.loader = torch.utils.data.DataLoader(train_dataSet(self.noarmal_data, self.labels,self.data),batch_size=loader_batch)
+        else :
+            self.loader = torch.utils.data.DataLoader(dataSet(self.data, self.labels),batch_size=loader_batch)
+
+
+class train_dataSet(torch.utils.data.Dataset):
+    def __init__(self,data,labels,data_pn):
+        self.data = data
+        self.labels = labels
+        self.data_pn = data_pn
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self,index):
+        data = self.data[index]
+        labels = self.labels[index]
+        data_pn = self.data_pn[index]
+        return data,labels,data_pn
+    
         
-        self.loader = dataSet(self.data, self.labels)
-
-
+        
 from advertorch.attacks.base import Attack,LabelMixin
 from advertorch.utils import clamp
 from advertorch.utils import normalize_by_pnorm
